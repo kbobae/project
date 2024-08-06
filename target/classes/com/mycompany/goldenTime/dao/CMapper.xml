@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.goldenTime.dao.CRepository">
+	
+	<resultMap id="CDataVOResultMap" type="com.mycompany.goldenTime.model.CDataVO">
+	    <result property="region" column="region"/>
+	    <result property="year" column="year"/>
+	    <result property="month" column="month"/>
+	    <result property="patient_ER" column="patient_er"/>
+	    <result property="patient_119" column="patient_119"/>
+	    <result property="TA" column="ta"/>
+	</resultMap>
+	
+	<select id="getNationwideData" parameterType="int" resultMap="CDataVOResultMap">
+		SELECT
+		    emergency.region,
+		    emergency.year,
+		    emergency.month,
+		    emergency.patient_ER,
+		    transport.patient_119,
+		    accidents.TA
+		FROM
+		    emergency
+		JOIN
+		    transport ON emergency.region = transport.region AND emergency.year = transport.year AND emergency.month = transport.month
+		JOIN
+		    accidents ON emergency.region = accidents.region AND emergency.year = accidents.year AND emergency.month = accidents.month
+		WHERE
+		    emergency.region = '전국'
+		    AND emergency.year = 2021
+		    AND emergency.month = #{month}
+	</select>
+	
+	<select id="getNationwideRegression" resultType="com.mycompany.goldenTime.model.CRegressionVO">
+		select * from regression where region='nationwide'
+	</select>
+	
+	<select id="getRegionData" parameterType="map" resultMap="CDataVOResultMap">
+		SELECT
+		    emergency.region,
+		    emergency.year,
+		    emergency.month,
+		    emergency.patient_ER,
+	        transport.patient_119,
+	        accidents.TA
+		FROM
+		    emergency
+		JOIN
+		    transport ON emergency.region = transport.region AND emergency.year = transport.year AND emergency.month = transport.month
+		JOIN
+		    accidents ON emergency.region = accidents.region AND emergency.year = accidents.year AND emergency.month = accidents.month
+		WHERE
+		    emergency.year = 2021
+		    AND emergency.month = #{month}
+		    AND emergency.region = #{region}
+	</select>
+	
+	<select id="getRegionRegression" parameterType="string" resultType="com.mycompany.goldenTime.model.CRegressionVO">
+		select * from regression where region=#{region}
+	</select>
+	
+</mapper>

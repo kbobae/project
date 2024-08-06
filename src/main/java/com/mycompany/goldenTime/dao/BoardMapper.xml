@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.goldenTime.dao.IBoardRepository">
+	<resultMap id="getBoardResultMap" type="com.mycompany.goldenTime.model.BoardVO">
+		<result property="bId" column="BID" />
+		<result property="bName" column="BNAME" />
+		<result property="bTitle" column="BTITLE" />
+		<result property="bContent" column="BCONTENT" />
+		<result property="bDate" column="BDATE" />
+		<result property="bHit" column="BHIT" />
+		<result property="bGroup" column="BGROUP" />
+		<result property="bStep" column="BSTEP" />
+		<result property="bIndent" column="BINDENT" />
+	</resultMap>
+	
+	<select id="list" resultMap="getBoardResultMap">
+	<![CDATA[
+		SELECT * FROM (SELECT a.*, ROWNUM rnum 
+		FROM (SELECT * FROM board ORDER BY bGroup DESC, bStep ASC) a WHERE ROWNUM <= #{startRow} + #{pageSize}) 
+		WHERE rnum > #{startRow}
+	]]>
+	</select>
+	
+	<select id="getTotalRecords" resultType="int">
+		SELECT COUNT(*) FROM BOARD
+	</select>
+	
+	 <insert id="write">
+        INSERT INTO board(bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent, bAuthorId)
+        VALUES (board_seq.nextval,#{bName},#{bTitle},#{bContent},0,board_seq.currval,0,0, #{bAuthorId})
+    </insert>
+	
+	<select id="contentView" resultType="com.mycompany.goldenTime.model.BoardVO">
+        SELECT * FROM board WHERE bId = #{bId}
+    </select>
+    
+    <update id="modify">
+        UPDATE board SET bTitle = #{bTitle}, bContent = #{bContent} WHERE bId = #{bId}
+    </update>
+    
+    <delete id="delete">
+        DELETE FROM board WHERE bId = #{bId}
+    </delete>
+    
+    <select id="reply_view" resultType="com.mycompany.goldenTime.model.BoardVO">
+        SELECT * FROM board WHERE bId = #{bId}
+    </select>
+    
+    <insert id="reply" parameterType="com.mycompany.goldenTime.model.BoardVO">
+        INSERT INTO board (bId, bName, bTitle, bContent, bGroup, bStep, bIndent)
+        VALUES (board_seq.nextval,#{bName},#{bTitle},#{bContent},#{bGroup},#{bStep},#{bIndent})
+    </insert>
+    
+    <update id="replyShape">
+        UPDATE board SET bStep = bStep + 1 WHERE bGroup = #{bGroup} AND bStep > #{bStep}
+    </update>
+    
+    <update id="upHit">
+        UPDATE board SET bHit = bHit + 1 WHERE bId = #{bId}
+    </update>
+	
+</mapper>
